@@ -100,7 +100,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import GeneralInfo from '@/components/hackathon/GeneralInfo.vue'
 
@@ -204,9 +204,12 @@ const closeRegistrationModal = () => {
 }
 
 const registerAsSolo = () => {
-  // Handle solo registration
-  console.log('Solo registration')
-  closeRegistrationModal()
+  // Логика регистрации соло участника
+  console.log('Регистрация соло участника')
+  // Отправка запроса на сервер
+  setTimeout(() => {
+    showRegistrationModal.value = false
+  }, 1000)
 }
 
 const registerAsTeam = () => {
@@ -218,29 +221,55 @@ const joinTeam = () => {
 }
 
 const generateTeamCode = () => {
-  return 'TEAM' + Math.random().toString(36).substr(2, 6).toUpperCase()
+  // Генерация уникального кода команды
+  return 'TEAM' + Math.random().toString(36).substring(2, 8).toUpperCase()
 }
 
 const copyTeamCode = () => {
   const code = generateTeamCode()
   navigator.clipboard.writeText(code)
+  // Показать уведомление об успешном копировании
 }
 
 const submitTeamCode = () => {
-  // Handle team code submission
-  console.log('Joining team with code:', teamCode.value)
-  closeRegistrationModal()
+  if (!teamCode.value) return
+  // Отправка запроса на сервер для проверки кода команды
+  console.log('Присоединение к команде:', teamCode.value)
+  showRegistrationModal.value = false
 }
 
 const submitTeamCreation = () => {
-  // Handle team creation
-  console.log('Creating team:', teamName.value)
-  closeRegistrationModal()
+  if (!teamName.value) return
+  // Отправка запроса на сервер для создания команды
+  console.log('Создание команды:', teamName.value)
+  showRegistrationModal.value = false
 }
 
 onMounted(() => {
-  // Fetch hackathon data using route.params.id
-  console.log('Hackathon ID:', route.params.id)
+  // Загрузка данных хакатона
+  const loadHackathonData = async () => {
+    try {
+      // Здесь будет API запрос
+      // const response = await fetch(`/api/hackathons/${route.params.id}`)
+      // hackathonData.value = await response.json()
+      
+      // Проверяем хэш для автоматического открытия модального окна
+      if (route.hash === '#registration') {
+        openRegistrationModal()
+      }
+    } catch (error) {
+      console.error('Ошибка при загрузке данных:', error)
+    }
+  }
+  
+  loadHackathonData()
+})
+
+// Следим за изменением хэша
+watch(() => route.hash, (newHash) => {
+  if (newHash === '#registration') {
+    openRegistrationModal()
+  }
 })
 </script>
 
@@ -248,7 +277,7 @@ onMounted(() => {
 .hackathon-details-view {
   padding: 20px;
   margin-bottom: 70px;
-  min-height: calc(100vh - 70px);
+  background: var(--surface-color);
 }
 
 @media (min-width: 768px) {
@@ -258,19 +287,17 @@ onMounted(() => {
   }
 }
 
+/* Tabs Navigation */
 .tabs-nav {
-  position: sticky;
-  top: 0;
-  background: var(--surface-color);
-  padding: 0 20px;
-  margin: -20px -20px 20px;
   display: flex;
   gap: 8px;
+  padding: 16px;
+  margin: -20px -20px 20px;
+  background: var(--surface-variant);
+  border-bottom: 1px solid var(--border-color);
   overflow-x: auto;
-  scrollbar-width: none;
   -ms-overflow-style: none;
-  box-shadow: var(--shadow-sm);
-  z-index: 10;
+  scrollbar-width: none;
 }
 
 .tabs-nav::-webkit-scrollbar {
@@ -281,40 +308,44 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 16px;
-  color: var(--text-secondary);
-  background: transparent;
+  padding: 12px 20px;
   border: none;
-  border-radius: 0;
-  cursor: pointer;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
   white-space: nowrap;
+  cursor: pointer;
   transition: all 0.2s ease;
 }
 
-.tab-btn .tab-icon {
-  width: 20px;
-  height: 20px;
-}
-
-.tab-btn .tab-icon svg {
-  width: 100%;
-  height: 100%;
-}
-
 .tab-btn:hover {
-  color: var(--text-primary);
-  background: var(--surface-variant);
+  background: var(--surface-hover);
 }
 
 .tab-btn.active {
-  color: var(--primary-color);
-  box-shadow: inset 0 -2px 0 var(--primary-color);
+  background: var(--primary-color);
+  color: white;
 }
 
-.tab-content {
-  animation: fadeIn 0.3s ease;
+.tab-btn.active svg {
+  color: white;
 }
 
+.tab-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tab-icon svg {
+  width: 20px;
+  height: 20px;
+  color: var(--text-tertiary);
+}
+
+/* Modal */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -322,33 +353,31 @@ onMounted(() => {
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  animation: fadeIn 0.2s ease;
+  padding: 20px;
 }
 
 .modal-content {
+  width: 100%;
+  max-width: 500px;
   background: var(--surface-color);
   border-radius: var(--radius-lg);
   padding: 24px;
-  width: 90%;
-  max-width: 500px;
-  box-shadow: var(--shadow-lg);
-  animation: slideUp 0.3s ease;
 }
 
 .modal-content h2 {
   margin: 0 0 24px;
-  color: var(--text-primary);
   font-size: 24px;
+  color: var(--text-primary);
 }
 
 .registration-options {
   display: grid;
   gap: 16px;
+  margin-bottom: 24px;
 }
 
 .option-btn {
@@ -356,47 +385,62 @@ onMounted(() => {
   align-items: center;
   gap: 12px;
   padding: 16px;
-  background: var(--surface-variant);
-  border: none;
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
+  background: var(--surface-color);
   color: var(--text-primary);
   font-size: 16px;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .option-btn:hover {
-  background: var(--surface-variant-hover);
-  transform: translateY(-2px);
+  background: var(--surface-variant);
+  border-color: var(--primary-color);
 }
 
 .option-btn svg {
   width: 24px;
   height: 24px;
+  color: var(--text-secondary);
+}
+
+.option-btn.solo:hover {
+  border-color: #2ECC71;
+}
+
+.option-btn.team:hover {
+  border-color: #3498DB;
+}
+
+.option-btn.join:hover {
+  border-color: #9B59B6;
 }
 
 .team-code-input,
 .create-team-form {
   margin-top: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
 }
 
 .team-code-input label,
 .create-team-form label {
+  display: block;
+  margin-bottom: 8px;
   color: var(--text-secondary);
   font-size: 14px;
 }
 
 .team-code-input input,
 .create-team-form input {
+  width: 100%;
   padding: 12px;
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   background: var(--surface-color);
   color: var(--text-primary);
   font-size: 16px;
+  margin-bottom: 16px;
 }
 
 .team-code-input input:focus,
@@ -405,27 +449,37 @@ onMounted(() => {
   border-color: var(--primary-color);
 }
 
+.team-code {
+  margin-bottom: 16px;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
 .code-display {
   display: flex;
   align-items: center;
   gap: 8px;
+  margin-top: 8px;
   padding: 12px;
   background: var(--surface-variant);
   border-radius: var(--radius-md);
   font-family: monospace;
   font-size: 16px;
+  color: var(--text-primary);
 }
 
 .copy-btn {
-  padding: 4px;
-  background: transparent;
+  padding: 8px;
   border: none;
-  color: var(--text-secondary);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-tertiary);
   cursor: pointer;
-  transition: color 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .copy-btn:hover {
+  background: var(--surface-hover);
   color: var(--primary-color);
 }
 
@@ -435,34 +489,30 @@ onMounted(() => {
 }
 
 .submit-btn {
-  margin-top: 12px;
-  padding: 12px 24px;
-  background: var(--primary-color);
-  color: white;
+  width: 100%;
+  padding: 12px;
   border: none;
   border-radius: var(--radius-md);
+  background: var(--primary-color);
+  color: white;
+  font-size: 16px;
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: background 0.2s;
 }
 
 .submit-btn:hover {
   background: var(--primary-color-dark);
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* Dark Theme */
+.dark-theme {
+  --surface-color: #1a1a1a;
+  --surface-variant: #2d2d2d;
+  --surface-hover: #333333;
+  --text-primary: #ffffff;
+  --text-secondary: #b3b3b3;
+  --text-tertiary: #808080;
+  --border-color: #404040;
 }
 </style>

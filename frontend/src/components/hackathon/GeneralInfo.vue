@@ -184,6 +184,7 @@ const getRegistrationProgress = () => {
 .general-info {
   max-width: 1200px;
   margin: 0 auto;
+  animation: fadeIn 0.3s ease;
 }
 
 .cover-section {
@@ -191,78 +192,99 @@ const getRegistrationProgress = () => {
   width: 100%;
   height: 300px;
   overflow: hidden;
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   margin-bottom: 24px;
+  box-shadow: var(--shadow-md);
 }
 
 .cover-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.cover-section:hover .cover-image {
+  transform: scale(1.05);
 }
 
 .status-badge {
   position: absolute;
-  top: 20px;
-  right: 20px;
+  top: 16px;
+  right: 16px;
   padding: 8px 16px;
-  border-radius: 20px;
-  font-weight: 500;
+  border-radius: var(--radius-full);
   font-size: 14px;
+  font-weight: 500;
+  color: white;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
 }
 
 .status-badge.registration {
-  background: #E3F2FD;
-  color: #1976D2;
+  background: linear-gradient(135deg, #2ECC71, #27AE60);
 }
 
 .status-badge.active {
-  background: #E8F5E9;
-  color: #2E7D32;
+  background: linear-gradient(135deg, #3498DB, #2980B9);
 }
 
 .status-badge.completed {
-  background: #EEEEEE;
-  color: #616161;
+  background: linear-gradient(135deg, #95A5A6, #7F8C8D);
 }
 
 .status-badge.upcoming {
-  background: #FFF3E0;
-  color: #F57C00;
+  background: linear-gradient(135deg, #E74C3C, #C0392B);
 }
 
 .content-section {
-  padding: 0 20px;
+  padding: 0 16px;
+}
+
+@media (min-width: 768px) {
+  .content-section {
+    padding: 0;
+  }
 }
 
 h1 {
   margin: 0 0 16px;
   font-size: 32px;
+  font-weight: 700;
   color: var(--text-primary);
 }
 
 .description {
-  font-size: 18px;
+  margin: 0 0 32px;
+  font-size: 16px;
   line-height: 1.6;
   color: var(--text-secondary);
-  margin-bottom: 32px;
 }
 
 .key-info {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 24px;
+  gap: 16px;
   margin-bottom: 32px;
+}
+
+@media (min-width: 768px) {
+  .key-info {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 .info-item {
   display: flex;
   align-items: flex-start;
-  gap: 16px;
-  padding: 20px;
-  background: var(--surface-color);
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  gap: 12px;
+  padding: 16px;
+  background: var(--surface-variant);
+  border-radius: var(--radius-lg);
+  transition: transform 0.2s ease;
+}
+
+.info-item:hover {
+  transform: translateY(-2px);
 }
 
 .info-item svg {
@@ -291,6 +313,9 @@ h1 {
 
 .registration-section {
   margin-bottom: 40px;
+  padding: 24px;
+  background: var(--surface-variant);
+  border-radius: var(--radius-lg);
 }
 
 .progress-bar {
@@ -307,34 +332,34 @@ h1 {
 
 .progress-track {
   height: 8px;
-  background: var(--surface-variant);
-  border-radius: 4px;
+  background: var(--surface-color);
+  border-radius: var(--radius-full);
   overflow: hidden;
 }
 
 .progress-fill {
   height: 100%;
-  background: var(--primary-color);
-  border-radius: 4px;
+  background: linear-gradient(90deg, var(--primary-color), var(--primary-color-light));
+  border-radius: var(--radius-full);
   transition: width 0.3s ease;
 }
 
 .register-btn {
   width: 100%;
-  padding: 16px;
+  padding: 12px;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   background: var(--primary-color);
   color: white;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
 }
 
 .register-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(74, 102, 244, 0.2);
+  background: var(--primary-color-dark);
+  transform: translateY(-1px);
 }
 
 .content-cards {
@@ -342,16 +367,22 @@ h1 {
   gap: 24px;
 }
 
+@media (min-width: 768px) {
+  .content-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 .content-card {
-  background: var(--surface-color);
-  border-radius: 16px;
   padding: 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  background: var(--surface-variant);
+  border-radius: var(--radius-lg);
 }
 
 .content-card h2 {
   margin: 0 0 20px;
-  font-size: 24px;
+  font-size: 20px;
+  font-weight: 600;
   color: var(--text-primary);
 }
 
@@ -368,10 +399,15 @@ h1 {
 }
 
 .organizer-item img {
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
   object-fit: cover;
+}
+
+.organizer-item span {
+  font-size: 14px;
+  color: var(--text-secondary);
 }
 
 .judges-list {
@@ -388,7 +424,7 @@ h1 {
 .judge-item img {
   width: 48px;
   height: 48px;
-  border-radius: 24px;
+  border-radius: var(--radius-full);
   object-fit: cover;
 }
 
@@ -399,6 +435,7 @@ h1 {
 }
 
 .judge-info strong {
+  font-size: 16px;
   color: var(--text-primary);
 }
 
@@ -416,14 +453,20 @@ h1 {
   display: grid;
   grid-template-columns: auto 1fr;
   gap: 16px;
-  padding: 16px;
-  background: var(--surface-variant);
-  border-radius: 8px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.schedule-item:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
 }
 
 .event-time {
+  font-size: 14px;
   font-weight: 500;
   color: var(--primary-color);
+  white-space: nowrap;
 }
 
 .event-info {
@@ -433,6 +476,7 @@ h1 {
 }
 
 .event-info strong {
+  font-size: 16px;
   color: var(--text-primary);
 }
 
@@ -443,61 +487,23 @@ h1 {
 }
 
 .rules-list {
-  list-style: none;
-  padding: 0;
   margin: 0;
-  display: grid;
-  gap: 12px;
+  padding-left: 20px;
 }
 
 .rules-list li {
-  position: relative;
-  padding-left: 24px;
-  color: var(--text-primary);
-  line-height: 1.5;
+  margin-bottom: 12px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.6;
 }
 
-.rules-list li::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 8px;
-  width: 8px;
-  height: 8px;
-  background: var(--primary-color);
-  border-radius: 4px;
+.rules-list li:last-child {
+  margin-bottom: 0;
 }
 
-@media (max-width: 768px) {
-  .cover-section {
-    height: 200px;
-    border-radius: 0;
-    margin: -20px -20px 24px;
-  }
-
-  .content-section {
-    padding: 0;
-  }
-
-  h1 {
-    font-size: 24px;
-  }
-
-  .description {
-    font-size: 16px;
-  }
-
-  .key-info {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-
-  .content-card {
-    padding: 20px;
-  }
-
-  .content-card h2 {
-    font-size: 20px;
-  }
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 </style>

@@ -36,13 +36,6 @@
       <div class="modal-content" @click.stop>
         <h2>Регистрация на хакатон</h2>
         <div class="registration-options">
-          <button class="option-btn solo" @click="registerAsSolo">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-              <circle cx="12" cy="7" r="4"></circle>
-            </svg>
-            <span>Участвовать соло</span>
-          </button>
           <button class="option-btn team" @click="registerAsTeam">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -201,15 +194,6 @@ const closeRegistrationModal = () => {
   registrationStep.value = ''
   teamCode.value = ''
   teamName.value = ''
-}
-
-const registerAsSolo = () => {
-  // Логика регистрации соло участника
-  console.log('Регистрация соло участника')
-  // Отправка запроса на сервер
-  setTimeout(() => {
-    showRegistrationModal.value = false
-  }, 1000)
 }
 
 const registerAsTeam = () => {
@@ -404,10 +388,6 @@ watch(() => route.hash, (newHash) => {
   width: 24px;
   height: 24px;
   color: var(--text-secondary);
-}
-
-.option-btn.solo:hover {
-  border-color: #2ECC71;
 }
 
 .option-btn.team:hover {

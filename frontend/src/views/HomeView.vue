@@ -70,9 +70,6 @@
                 <div class="event-image" :style="{ backgroundImage: `url(${event.backgroundImage || getDefaultBackground(event.type)})` }">
                   <div class="event-overlay">
                     <div class="event-header">
-                      <span class="event-type" :style="getEventTypeStyle(event.type)">
-                        {{ getEventTypeLabel(event.type) }}
-                      </span>
                       <span class="event-status" :class="event.status">
                         {{ getStatusLabel(event.status) }}
                       </span>
@@ -1113,13 +1110,6 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 8px;
-}
-
-.event-type {
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
 }
 
 .event-status {

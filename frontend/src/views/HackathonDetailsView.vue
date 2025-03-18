@@ -20,15 +20,20 @@
         :hackathon="hackathonData"
         @openRegistration="openRegistrationModal"
       />
-      <div v-else-if="activeTab === 'participants'" class="participants-tab">
-        <!-- Participants content -->
-      </div>
-      <div v-else-if="activeTab === 'teams'" class="teams-tab">
-        <!-- Teams content -->
-      </div>
-      <div v-else-if="activeTab === 'tracks'" class="tracks-tab">
-        <!-- Tracks content -->
-      </div>
+      <ParticipantsTab 
+        v-if="activeTab === 'participants'" 
+        :participants="participants"
+      />
+      <TeamsTab 
+        v-if="activeTab === 'teams'" 
+        :teams="teams"
+        @team-created="handleTeamCreated"
+        @join-team="handleJoinTeam"
+      />
+      <TracksTab 
+        v-if="activeTab === 'tracks'" 
+        :tracks="tracks"
+      />
     </div>
 
     <!-- Registration Modal -->
@@ -93,9 +98,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import GeneralInfo from '@/components/hackathon/GeneralInfo.vue'
+import ParticipantsTab from '@/components/hackathon/ParticipantsTab.vue'
+import TeamsTab from '@/components/hackathon/TeamsTab.vue'
+import TracksTab from '@/components/hackathon/TracksTab.vue'
 
 const route = useRoute()
 const activeTab = ref('general')
@@ -156,6 +164,39 @@ const hackathonData = ref({
     'Использование готовых решений должно быть согласовано с организаторами'
   ]
 })
+
+const participants = ref([
+  {
+    id: 1,
+    name: 'Алексей Иванов',
+    role: 'Full-stack разработчик',
+    team: 'CodeMasters',
+    stack: ['Vue.js', 'Node.js', 'MongoDB']
+  }
+])
+
+const teams = ref([
+  {
+    id: 1,
+    name: 'CodeMasters',
+    members: [
+      { id: 1, name: 'Алексей Иванов' }
+    ],
+    stack: ['Vue.js', 'Node.js', 'AI'],
+    status: 'open',
+    maxMembers: 5
+  }
+])
+
+const tracks = ref([
+  {
+    id: 1,
+    title: 'AI & ML',
+    description: 'Создание решений на основе искусственного интеллекта',
+    participants: 45,
+    teams: 15
+  }
+])
 
 const tabs = [
   {
@@ -227,6 +268,14 @@ const submitTeamCreation = () => {
   // Отправка запроса на сервер для создания команды
   console.log('Создание команды:', teamName.value)
   showRegistrationModal.value = false
+}
+
+const handleTeamCreated = (team) => {
+  teams.value.push(team)
+}
+
+const handleJoinTeam = (teamId) => {
+  console.log('Joining team:', teamId)
 }
 
 onMounted(() => {

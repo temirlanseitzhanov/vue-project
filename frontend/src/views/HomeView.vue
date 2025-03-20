@@ -244,7 +244,7 @@ const events = ref([
     participants: 128,
     tags: ['Python', 'AI/ML', 'Computer Vision'],
     prize: '1 000 000 ₸',
-    backgroundImage: '/images/event1.jpg'
+    backgroundImage: "/images/event1.jpg"
   },
   {
     id: 2,

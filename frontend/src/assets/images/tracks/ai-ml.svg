@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800px" height="600px" viewBox="0 0 800 600" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <rect fill="#4F46E5" x="0" y="0" width="800" height="600"/>
+        <g transform="translate(200, 150)">
+            <!-- Brain Icon -->
+            <path d="M200,0 C310.457,0 400,89.543 400,200 C400,310.457 310.457,400 200,400 C89.543,400 0,310.457 0,200 C0,89.543 89.543,0 200,0" fill="#FFFFFF"/>
+            <path d="M280,160 C280,124.772 251.228,96 216,96 C180.772,96 152,124.772 152,160 M152,160 L280,160 M216,96 L216,224" stroke="#4F46E5" stroke-width="16"/>
+            <!-- Neural Network Lines -->
+            <path d="M120,120 L180,180 M180,120 L120,180 M240,120 L300,180 M300,120 L240,180" stroke="#4F46E5" stroke-width="8"/>
+        </g>
+    </g>
+</svg>

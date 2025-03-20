@@ -1,6 +1,5 @@
 <template>
-  <div class="hackathon-details-view" :class="{ 'dark-theme': isDarkTheme }">
-    <!-- Tabs Navigation -->
+  <div class="hackathon-details-view">
     <nav class="tabs-nav" ref="tabsNav">
       <button 
         v-for="tab in tabs" 
@@ -8,17 +7,17 @@
         :class="['tab-btn', { active: activeTab === tab.id }]"
         @click="setActiveTab(tab.id)"
       >
-        <span class="tab-icon" v-html="tab.icon"></span>
+        <i :class="tab.icon"></i>
         {{ tab.title }}
       </button>
     </nav>
 
-    <!-- Tab Content -->
     <div class="tab-content">
       <GeneralInfo 
         v-if="activeTab === 'general'" 
         :hackathon="hackathonData"
         @openRegistration="openRegistrationModal"
+        @changeTab="setActiveTab"
       />
       <ParticipantsTab 
         v-if="activeTab === 'participants'" 
@@ -27,8 +26,6 @@
       <TeamsTab 
         v-if="activeTab === 'teams'" 
         :teams="teams"
-        @team-created="handleTeamCreated"
-        @join-team="handleJoinTeam"
       />
       <TracksTab 
         v-if="activeTab === 'tracks'" 
@@ -42,21 +39,11 @@
         <h2>Регистрация на хакатон</h2>
         <div class="registration-options">
           <button class="option-btn team" @click="registerAsTeam">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-              <circle cx="9" cy="7" r="4"></circle>
-              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-            </svg>
+            <i class="fas fa-users"></i>
             <span>Создать команду</span>
           </button>
           <button class="option-btn join" @click="joinTeam">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-              <circle cx="8.5" cy="7" r="4"></circle>
-              <line x1="20" y1="8" x2="20" y2="14"></line>
-              <line x1="23" y1="11" x2="17" y2="11"></line>
-            </svg>
+            <i class="fas fa-user-plus"></i>
             <span>Присоединиться к команде</span>
           </button>
         </div>
@@ -78,18 +65,6 @@
             v-model="teamName"
             placeholder="Введите название команды"
           />
-          <div class="team-code">
-            Код для приглашения участников:
-            <div class="code-display">
-              {{ generateTeamCode() }}
-              <button type="button" class="copy-btn" @click="copyTeamCode">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="9" y="9" width="13" height="13" rx="2.18" ry="2.18"></rect>
-                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                </svg>
-              </button>
-            </div>
-          </div>
           <button class="submit-btn" @click="submitTeamCreation">Создать команду</button>
         </div>
       </div>
@@ -98,128 +73,179 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { ref, onMounted } from 'vue'
 import GeneralInfo from '@/components/hackathon/GeneralInfo.vue'
 import ParticipantsTab from '@/components/hackathon/ParticipantsTab.vue'
 import TeamsTab from '@/components/hackathon/TeamsTab.vue'
 import TracksTab from '@/components/hackathon/TracksTab.vue'
 
-const route = useRoute()
 const activeTab = ref('general')
 const showRegistrationModal = ref(false)
 const registrationStep = ref('')
 const teamCode = ref('')
 const teamName = ref('')
-const isDarkTheme = ref(false)
 
-// Mock data for testing
+const tabs = [
+  { id: 'general', title: 'Общая информация', icon: 'fas fa-info-circle' },
+  { id: 'participants', title: 'Участники', icon: 'fas fa-users' },
+  { id: 'teams', title: 'Команды', icon: 'fas fa-user-friends' },
+  { id: 'tracks', title: 'Треки', icon: 'fas fa-code-branch' }
+]
+
 const hackathonData = ref({
   id: '1',
   title: 'Hack Platform 2024',
   status: 'registration',
-  description: 'Крупнейший хакатон для разработчиков, дизайнеров и продакт-менеджеров',
-  coverImage: 'https://picsum.photos/1200/300',
-  startDate: '2024-04-15',
-  endDate: '2024-04-17',
-  registrationStart: '2024-03-15',
-  location: 'Москва, Технопарк "Сколково"',
+  description: `Крупнейший хакатон для разработчиков, дизайнеров и продакт-менеджеров. Участники будут работать над инновационными решениями в области искусственного интеллекта, Web3 и мобильной разработки.
+
+Что вас ждет:
+• 48 часов интенсивной работы над проектом
+• Менторская поддержка от ведущих экспертов
+• Нетворкинг с профессионалами индустрии
+• Ценные призы для победителей
+• Возможность реализовать свои идеи
+
+Требования к участникам:
+• Опыт разработки от 1 года
+• Знание современных технологий
+• Готовность работать в команде
+• Желание создавать инновационные решения`,
+  startDate: '2025-04-20',
+  endDate: '2025-04-22',
+  startTime: '10:00',
+  location: 'Онлайн',
   prizePool: 1000000,
-  organizers: [
-    { id: 1, name: 'Tech Corp', logo: 'https://picsum.photos/50/50' },
-    { id: 2, name: 'Dev Inc', logo: 'https://picsum.photos/50/50' }
-  ],
-  judges: [
+  tracks: [
     { 
       id: 1, 
-      name: 'Иван Петров', 
-      position: 'CTO Tech Corp', 
-      avatar: 'https://picsum.photos/50/50' 
+      name: 'AI/ML', 
+      type: 'AI',
+      description: 'Разработка решений с использованием искусственного интеллекта и машинного обучения'
     },
     { 
       id: 2, 
-      name: 'Анна Иванова', 
-      position: 'Product Director', 
-      avatar: 'https://picsum.photos/50/50' 
+      name: 'Web3', 
+      type: 'Web3',
+      description: 'Создание децентрализованных приложений и блокчейн-решений'
+    },
+    { 
+      id: 3, 
+      name: 'Mobile', 
+      type: 'Mobile',
+      description: 'Разработка мобильных приложений для iOS и Android'
+    }
+  ],
+  organizers: [
+    { 
+      id: 1, 
+      name: 'Tech Platform', 
+      logo: '/images/tech-platform.png',
+      description: 'Ведущая технологическая платформа для разработчиков'
+    }
+  ],
+  partners: [
+    {
+      id: 1,
+      name: 'AI Solutions',
+      logo: '/images/ai-solutions.png',
+      role: 'Технологический партнер'
+    },
+    {
+      id: 2,
+      name: 'Web3 Foundation',
+      logo: '/images/web3-foundation.png',
+      role: 'Стратегический партнер'
+    }
+  ],
+  judges: [
+    {
+      id: 1,
+      name: 'Александр Петров',
+      position: 'CTO Tech Platform',
+      avatar: '/images/judge1.jpg',
+      expertise: 'AI/ML, Architecture'
+    },
+    {
+      id: 2,
+      name: 'Елена Смирнова',
+      position: 'Product Director, AI Solutions',
+      avatar: '/images/judge2.jpg',
+      expertise: 'Product Development, AI'
+    },
+    {
+      id: 3,
+      name: 'Михаил Козлов',
+      position: 'Lead Architect, Web3 Foundation',
+      avatar: '/images/judge3.jpg',
+      expertise: 'Blockchain, Web3'
     }
   ],
   schedule: [
     {
-      id: 1,
-      time: '2024-04-15T10:00',
-      title: 'Открытие',
-      description: 'Приветственное слово организаторов'
+      day: '20 апреля',
+      events: [
+        { id: 1, time: '10:00', title: 'Открытие хакатона', type: 'main' },
+        { id: 2, time: '11:00', title: 'Презентация треков', type: 'presentation' },
+        { id: 3, time: '12:00', title: 'Формирование команд', type: 'activity' },
+        { id: 4, time: '13:00', title: 'Обед', type: 'break' },
+        { id: 5, time: '14:00', title: 'Начало разработки', type: 'main' },
+        { id: 6, time: '18:00', title: 'Менторская сессия', type: 'mentoring' }
+      ]
     },
     {
-      id: 2,
-      time: '2024-04-15T11:00',
-      title: 'Начало работы',
-      description: 'Формирование команд и начало работы над проектами'
+      day: '21 апреля',
+      events: [
+        { id: 7, time: '10:00', title: 'Ежедневный чекпоинт', type: 'checkpoint' },
+        { id: 8, time: '11:00', title: 'Воркшоп: AI Development', type: 'workshop' },
+        { id: 9, time: '14:00', title: 'Воркшоп: Web3 Security', type: 'workshop' },
+        { id: 10, time: '16:00', title: 'Менторская сессия', type: 'mentoring' }
+      ]
+    },
+    {
+      day: '22 апреля',
+      events: [
+        { id: 11, time: '10:00', title: 'Финальный чекпоинт', type: 'checkpoint' },
+        { id: 12, time: '14:00', title: 'Предзащита проектов', type: 'presentation' },
+        { id: 13, time: '16:00', title: 'Защита проектов', type: 'main' },
+        { id: 14, time: '18:00', title: 'Подведение итогов', type: 'main' },
+        { id: 15, time: '19:00', title: 'Награждение победителей', type: 'ceremony' }
+      ]
     }
   ],
-  rules: [
-    'Команда должна состоять из 2-5 человек',
-    'Все участники должны быть старше 18 лет',
-    'Проект должен соответствовать одному из предложенных треков',
-    'Использование готовых решений должно быть согласовано с организаторами'
-  ]
+  prizes: [
+    {
+      place: 1,
+      amount: 500000,
+      extras: ['Менторская поддержка', 'Акселерационная программа']
+    },
+    {
+      place: 2,
+      amount: 300000,
+      extras: ['Менторская поддержка']
+    },
+    {
+      place: 3,
+      amount: 200000,
+      extras: ['Менторская поддержка']
+    }
+  ],
+  requirements: {
+    team: {
+      minSize: 2,
+      maxSize: 5,
+      roles: ['Разработчик', 'Дизайнер', 'Product Manager']
+    },
+    technical: [
+      'Опыт работы с современными фреймворками',
+      'Знание Git и командной разработки',
+      'Базовые знания в выбранном треке'
+    ]
+  }
 })
 
-const participants = ref([
-  {
-    id: 1,
-    name: 'Алексей Иванов',
-    role: 'Full-stack разработчик',
-    team: 'CodeMasters',
-    stack: ['Vue.js', 'Node.js', 'MongoDB']
-  }
-])
-
-const teams = ref([
-  {
-    id: 1,
-    name: 'CodeMasters',
-    members: [
-      { id: 1, name: 'Алексей Иванов' }
-    ],
-    stack: ['Vue.js', 'Node.js', 'AI'],
-    status: 'open',
-    maxMembers: 5
-  }
-])
-
-const tracks = ref([
-  {
-    id: 1,
-    title: 'AI & ML',
-    description: 'Создание решений на основе искусственного интеллекта',
-    participants: 45,
-    teams: 15
-  }
-])
-
-const tabs = [
-  {
-    id: 'general',
-    title: 'Общая информация',
-    icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>'
-  },
-  {
-    id: 'participants',
-    title: 'Участники',
-    icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>'
-  },
-  {
-    id: 'teams',
-    title: 'Команды',
-    icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>'
-  },
-  {
-    id: 'tracks',
-    title: 'Треки',
-    icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>'
-  }
-]
+const participants = ref([])
+const teams = ref([])
+const tracks = ref([])
 
 const setActiveTab = (tabId) => {
   activeTab.value = tabId
@@ -245,91 +271,42 @@ const joinTeam = () => {
   registrationStep.value = 'join-team'
 }
 
-const generateTeamCode = () => {
-  // Генерация уникального кода команды
-  return 'TEAM' + Math.random().toString(36).substring(2, 8).toUpperCase()
-}
-
-const copyTeamCode = () => {
-  const code = generateTeamCode()
-  navigator.clipboard.writeText(code)
-  // Показать уведомление об успешном копировании
-}
-
 const submitTeamCode = () => {
-  if (!teamCode.value) return
-  // Отправка запроса на сервер для проверки кода команды
-  console.log('Присоединение к команде:', teamCode.value)
-  showRegistrationModal.value = false
+  if (teamCode.value) {
+    closeRegistrationModal()
+  }
 }
 
 const submitTeamCreation = () => {
-  if (!teamName.value) return
-  // Отправка запроса на сервер для создания команды
-  console.log('Создание команды:', teamName.value)
-  showRegistrationModal.value = false
-}
-
-const handleTeamCreated = (team) => {
-  teams.value.push(team)
-}
-
-const handleJoinTeam = (teamId) => {
-  console.log('Joining team:', teamId)
+  if (teamName.value) {
+    closeRegistrationModal()
+  }
 }
 
 onMounted(() => {
-  // Загрузка данных хакатона
-  const loadHackathonData = async () => {
-    try {
-      // Здесь будет API запрос
-      // const response = await fetch(`/api/hackathons/${route.params.id}`)
-      // hackathonData.value = await response.json()
-      
-      // Проверяем хэш для автоматического открытия модального окна
-      if (route.hash === '#registration') {
-        openRegistrationModal()
-      }
-    } catch (error) {
-      console.error('Ошибка при загрузке данных:', error)
-    }
-  }
-  
-  loadHackathonData()
-})
-
-// Следим за изменением хэша
-watch(() => route.hash, (newHash) => {
-  if (newHash === '#registration') {
-    openRegistrationModal()
-  }
+  // Load initial data
 })
 </script>
 
 <style scoped>
 .hackathon-details-view {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
   padding: 20px;
-  margin-bottom: 70px;
-  background: var(--surface-color);
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
-@media (min-width: 768px) {
-  .hackathon-details-view {
-    margin-top: 70px;
-    margin-bottom: 0;
-  }
-}
-
-/* Tabs Navigation */
 .tabs-nav {
   display: flex;
-  gap: 8px;
-  padding: 16px;
-  margin: -20px -20px 20px;
-  background: var(--surface-variant);
-  border-bottom: 1px solid var(--border-color);
+  gap: 10px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 10px;
+  width: 100%;
   overflow-x: auto;
-  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
 }
 
@@ -338,47 +315,37 @@ watch(() => route.hash, (newHash) => {
 }
 
 .tab-btn {
+  padding: 8px 16px;
+  border: none;
+  background: none;
+  color: #6b7280;
+  cursor: pointer;
+  font-weight: 500;
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 20px;
-  border: none;
-  border-radius: var(--radius-md);
-  background: transparent;
-  color: var(--text-secondary);
-  font-size: 14px;
-  font-weight: 500;
   white-space: nowrap;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s;
 }
 
 .tab-btn:hover {
-  background: var(--surface-hover);
+  color: #3b82f6;
 }
 
 .tab-btn.active {
-  background: var(--primary-color);
-  color: white;
+  color: #3b82f6;
+  border-bottom: 2px solid #3b82f6;
+  margin-bottom: -11px;
 }
 
-.tab-btn.active svg {
-  color: white;
+.tab-btn i {
+  font-size: 16px;
 }
 
-.tab-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.tab-content {
+  width: 100%;
 }
 
-.tab-icon svg {
-  width: 20px;
-  height: 20px;
-  color: var(--text-tertiary);
-}
-
-/* Modal */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -390,158 +357,104 @@ watch(() => route.hash, (newHash) => {
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  padding: 20px;
 }
 
 .modal-content {
-  width: 100%;
-  max-width: 500px;
-  background: var(--surface-color);
-  border-radius: var(--radius-lg);
+  background: white;
   padding: 24px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
 }
 
 .modal-content h2 {
-  margin: 0 0 24px;
+  margin: 0 0 20px;
   font-size: 24px;
-  color: var(--text-primary);
+  color: #1f2937;
 }
 
 .registration-options {
   display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 16px;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .option-btn {
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
   display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 12px;
-  padding: 16px;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  background: var(--surface-color);
-  color: var(--text-primary);
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s;
 }
 
 .option-btn:hover {
-  background: var(--surface-variant);
-  border-color: var(--primary-color);
+  border-color: #3b82f6;
+  background: #f8fafc;
 }
 
-.option-btn svg {
-  width: 24px;
-  height: 24px;
-  color: var(--text-secondary);
+.option-btn i {
+  font-size: 24px;
+  color: #3b82f6;
 }
 
-.option-btn.team:hover {
-  border-color: #3498DB;
-}
-
-.option-btn.join:hover {
-  border-color: #9B59B6;
+.option-btn span {
+  font-weight: 500;
+  color: #1f2937;
 }
 
 .team-code-input,
 .create-team-form {
-  margin-top: 24px;
-}
-
-.team-code-input label,
-.create-team-form label {
-  display: block;
-  margin-bottom: 8px;
-  color: var(--text-secondary);
-  font-size: 14px;
-}
-
-.team-code-input input,
-.create-team-form input {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  background: var(--surface-color);
-  color: var(--text-primary);
-  font-size: 16px;
-  margin-bottom: 16px;
-}
-
-.team-code-input input:focus,
-.create-team-form input:focus {
-  outline: none;
-  border-color: var(--primary-color);
-}
-
-.team-code {
-  margin-bottom: 16px;
-  color: var(--text-secondary);
-  font-size: 14px;
-}
-
-.code-display {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 8px;
-  padding: 12px;
-  background: var(--surface-variant);
-  border-radius: var(--radius-md);
-  font-family: monospace;
-  font-size: 16px;
-  color: var(--text-primary);
+  flex-direction: column;
+  gap: 12px;
 }
 
-.copy-btn {
-  padding: 8px;
-  border: none;
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--text-tertiary);
-  cursor: pointer;
-  transition: all 0.2s ease;
+label {
+  font-weight: 500;
+  color: #374151;
 }
 
-.copy-btn:hover {
-  background: var(--surface-hover);
-  color: var(--primary-color);
+input {
+  padding: 8px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 14px;
 }
 
-.copy-btn svg {
-  width: 20px;
-  height: 20px;
+input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px #bfdbfe;
 }
 
 .submit-btn {
-  width: 100%;
-  padding: 12px;
-  border: none;
-  border-radius: var(--radius-md);
-  background: var(--primary-color);
+  padding: 10px 20px;
+  background: #3b82f6;
   color: white;
-  font-size: 16px;
+  border: none;
+  border-radius: 6px;
   font-weight: 500;
   cursor: pointer;
   transition: background 0.2s;
 }
 
 .submit-btn:hover {
-  background: var(--primary-color-dark);
+  background: #2563eb;
 }
 
-/* Dark Theme */
-.dark-theme {
-  --surface-color: #1a1a1a;
-  --surface-variant: #2d2d2d;
-  --surface-hover: #333333;
-  --text-primary: #ffffff;
-  --text-secondary: #b3b3b3;
-  --text-tertiary: #808080;
-  --border-color: #404040;
+@media (max-width: 640px) {
+  .registration-options {
+    grid-template-columns: 1fr;
+  }
+  
+  .hackathon-details-view {
+    padding: 16px;
+  }
 }
 </style>

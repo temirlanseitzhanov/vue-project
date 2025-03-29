@@ -4,6 +4,9 @@ import HackathonsView from '@/views/HackathonsView.vue'
 import RatingView from '@/views/RatingView.vue'
 import ShopView from '@/views/ShopView.vue'
 import ProfileView from '@/views/ProfileView.vue'
+import PublicProfileView from '@/views/PublicProfileView.vue'
+import HackathonRequestView from '@/views/HackathonRequestView.vue'
+import PollView from '@/views/PollView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -25,6 +28,12 @@ const router = createRouter({
       props: true
     },
     {
+      path: '/webinars/:id',
+      name: 'webinar-details',
+      component: () => import('@/views/WebinarDetailsView.vue'),
+      props: true
+    },
+    {
       path: '/rating',
       name: 'rating',
       component: RatingView
@@ -38,6 +47,21 @@ const router = createRouter({
       path: '/profile',
       name: 'profile',
       component: ProfileView
+    },
+    {
+      path: '/profile/:id',
+      name: 'publicProfile',
+      component: PublicProfileView
+    },
+    {
+      path: '/hackathon-request',
+      name: 'hackathonRequest',
+      component: HackathonRequestView
+    },
+    {
+      path: '/poll',
+      name: 'poll',
+      component: PollView
     }
   ]
 })

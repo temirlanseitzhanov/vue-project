@@ -17,3 +17,5 @@ import Navbar from './components/Navbar.vue'
   color: var(--text-primary);
 }
 </style>
+
+

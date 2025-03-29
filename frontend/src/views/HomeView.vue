@@ -63,9 +63,9 @@
             <div class="events-grid">
               <div 
                 v-for="event in getEventsByCategory(category.id)" 
-                :key="event.id"
+                :key="event.uniqueId"
                 class="event-card"
-                @click="router.push(`/hackathons/${event.id}`)"
+                @click="navigateToEvent(event)"
               >
                 <div class="event-image" :style="{ backgroundImage: `url(${event.backgroundImage || getDefaultBackground(event.type)})` }">
                   <div class="event-overlay">
@@ -282,48 +282,64 @@ const events = ref([
 
   // Вебинары
   {
-    id: 5,
-    title: 'Web3 Development',
+    id: 1,
+    title: 'Web3 Development: From Basics to Advanced',
+    type: 'webinars',
+    status: 'upcoming',
+    date: '2025-04-15T18:00:00',
+    participants: 256,
+    tags: ['Web3', 'Blockchain', 'Smart Contracts'],
+    speaker: 'Виталик Бутерин',
+    organization: 'Ethereum Foundation',
+    backgroundImage: null
+  },
+  {
+    id: 2,
+    title: 'Machine Learning для начинающих',
+    type: 'webinars',
+    status: 'upcoming',
+    date: '2025-04-10T15:00:00',
+    participants: 189,
+    tags: ['AI/ML', 'Python', 'Data Science'],
+    speaker: 'Ян ЛеКун',
+    organization: 'Meta AI Research',
+    backgroundImage: null
+  },
+  {
+    id: 3,
+    title: 'Cloud Computing в 2025: AWS, Azure, Google Cloud',
+    type: 'webinars',
+    status: 'upcoming',
+    date: '2025-04-18T14:00:00',
+    participants: 145,
+    tags: ['Cloud', 'DevOps', 'AWS', 'Azure'],
+    speaker: 'Джефф Безос',
+    organization: 'Amazon',
+    backgroundImage: null
+  },
+  {
+    id: 4,
+    title: 'Mobile Development: React Native vs Flutter',
     type: 'webinars',
     status: 'active',
-    date: '2025-03-17',
-    participants: 256,
-    tags: ['Blockchain', 'Smart Contracts'],
-    speaker: 'Виталик Бутерин',
-    backgroundImage: '/images/event5.jpg'
-  },
-  {
-    id: 6,
-    title: 'Cloud Computing',
-    type: 'webinars',
-    status: 'upcoming',
-    date: '2025-03-22',
-    participants: 180,
-    tags: ['AWS', 'Azure', 'DevOps'],
-    speaker: 'Джефф Безос',
-    backgroundImage: '/images/event6.jpg'
-  },
-  {
-    id: 7,
-    title: 'Machine Learning',
-    type: 'webinars',
-    status: 'upcoming',
-    date: '2025-03-24',
-    participants: 150,
-    tags: ['Python', 'TensorFlow', 'Deep Learning'],
-    speaker: 'Ян ЛеКун',
-    backgroundImage: '/images/event7.jpg'
-  },
-  {
-    id: 8,
-    title: 'Mobile Development',
-    type: 'webinars',
-    status: 'upcoming',
-    date: '2025-03-26',
-    participants: 120,
-    tags: ['iOS', 'Android', 'Cross-platform'],
+    date: '2025-04-05T16:00:00',
+    participants: 210,
+    tags: ['Mobile', 'React Native', 'Flutter'],
     speaker: 'Крис Латтнер',
-    backgroundImage: '/images/event8.jpg'
+    organization: 'Google',
+    backgroundImage: null
+  },
+  {
+    id: 5,
+    title: 'DevOps Practices for Modern Teams',
+    type: 'webinars',
+    status: 'completed',
+    date: '2025-03-30T17:00:00',
+    participants: 178,
+    tags: ['DevOps', 'CI/CD', 'Cloud'],
+    speaker: 'Келси Хайтауэр',
+    organization: 'Google Cloud',
+    backgroundImage: null
   },
 
   // Кейс-чемпионаты
@@ -445,8 +461,12 @@ const getNewsColor = (type) => {
 }
 
 // Navigation and interaction
-const navigateToEvent = (id) => {
-  router.push(`/hackathons/${id}`)
+const navigateToEvent = (event) => {
+  if (event.type === 'webinars') {
+    router.push(`/webinars/${event.id}`)
+  } else {
+    router.push(`/hackathons/${event.id}`)
+  }
 }
 
 const openNews = (news) => {
@@ -502,7 +522,13 @@ const filteredEvents = computed(() => {
 
 // Events by category
 const getEventsByCategory = (categoryId) => {
-  return events.value.filter(event => event.type === categoryId)
+  // Create a unique id by combining type and id for each event to avoid conflicts
+  return events.value
+    .filter(event => event.type === categoryId)
+    .map(event => ({
+      ...event,
+      uniqueId: `${event.type}-${event.id}`
+    }))
 }
 
 // Filter events by category
@@ -744,9 +770,16 @@ const getStatusLabel = (status) => {
 
 // Default background images
 const getDefaultBackground = (type) => {
+  if (type === 'webinars') {
+    // Generate a colored placeholder SVG - using Latin characters to avoid btoa encoding issues
+    const color = '#10B981'
+    const text = 'Webinar'
+    return `data:image/svg+xml;base64,${btoa(`<svg width="400" height="200" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="200" fill="${color}"/><text x="50%" y="50%" font-family="Arial, sans-serif" font-size="20" text-anchor="middle" fill="#ffffff" alignment-baseline="middle">${text}</text></svg>`)}`
+  }
+
+  // Other default backgrounds
   const backgrounds = {
     hackathons: '/images/default-hackathon.jpg',
-    webinars: '/images/default-webinar.jpg',
     cases: '/images/default-case.jpg'
   }
   return backgrounds[type] || backgrounds.hackathons

@@ -113,13 +113,6 @@
           </div>
         </div>
         
-        <div class="social-actions">
-          <button class="action-btn like-btn" :class="{ 'active': data.isLiked }" @click="toggleLike">
-            <i class="fas fa-heart"></i>
-            <div class="like-count">{{ data.likes }}</div>
-          </button>
-        </div>
-        
         <!-- What to expect section -->
         <div class="section-card expectations-section">
           <h2 class="section-title">Что вас ждет</h2>
@@ -216,9 +209,7 @@ const props = defineProps({
 const emit = defineEmits(['openRegistration', 'changeTab'])
 
 const data = reactive({
-  isLiked: false,
   isBookmarked: false,
-  likes: props.hackathon.likes || 0, 
   views: 156,
   reminderSet: false
 })
@@ -363,25 +354,6 @@ const formatDescription = (description) => {
 }
 
 // Social interactions
-const toggleLike = () => {
-  data.isLiked = !data.isLiked
-  // Update the likes count based on the current state
-  if (data.isLiked) {
-    data.likes += 1
-  } else {
-    data.likes = Math.max(0, data.likes - 1) // Ensure likes don't go below 0
-  }
-  
-  // Show a brief animation effect
-  const likeBtn = document.querySelector('.like-btn')
-  if (likeBtn) {
-    likeBtn.classList.add('animate')
-    setTimeout(() => {
-      likeBtn.classList.remove('animate')
-    }, 300)
-  }
-}
-
 const toggleBookmark = () => {
   data.isBookmarked = !data.isBookmarked
 }
@@ -1028,35 +1000,6 @@ h3 {
 
 .action-btn.active {
   color: #3b82f6;
-}
-
-.like-btn {
-  position: relative;
-  padding: 8px 16px;
-}
-
-.like-btn i {
-  font-size: 18px;
-  color: #6b7280;
-  transition: all 0.3s ease;
-}
-
-.like-btn.active i {
-  color: #ef4444;
-  animation: heartBeat 0.3s ease-in-out;
-}
-
-.like-count {
-  font-weight: 600;
-  font-size: 14px;
-  margin-top: 4px;
-  color: #4b5563;
-}
-
-@keyframes heartBeat {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.3); }
-  100% { transform: scale(1); }
 }
 
 /* Section card styles */

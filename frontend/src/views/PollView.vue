@@ -144,9 +144,6 @@
           </div>
           
           <div class="question-actions">
-            <button class="btn skip-btn" @click="skipQuestion">
-              Пропустить
-            </button>
             <button 
               class="btn next-btn" 
               @click="tryNextQuestion" 
@@ -157,6 +154,19 @@
           </div>
         </div>
       </transition>
+    </div>
+    
+    <!-- Programming Lottie Animation -->
+    <div class="lottie-container" v-if="showLottie">
+      <div class="lottie-content">
+        <h2 class="lottie-title">Спасибо за участие в опросе!</h2>
+        <div ref="lottieContainer" class="lottie-animation"></div>
+      </div>
+    </div>
+    
+    <!-- Fixed Programming Lottie Animation at the bottom -->
+    <div class="bottom-lottie" ref="bottomLottie">
+      <div ref="bottomLottieContainer" class="bottom-lottie-animation"></div>
     </div>
   </div>
 </template>
@@ -174,6 +184,7 @@ export default {
       isAgeDropdownOpen: false,
       ageSearchQuery: '',
       ageOptions: Array.from({ length: 95 }, (_, i) => i + 6), // Возраст от 6 до 100 лет
+      showLottie: false,
       questions: [
         {
           id: 'fullName',
@@ -302,14 +313,6 @@ export default {
         this.showError = false
       }
     },
-    skipQuestion() {
-      if (this.isLastQuestion) {
-        this.submitPoll()
-      } else {
-        this.currentQuestionIndex++
-        this.showError = false
-      }
-    },
     updateCheckboxAnswer(questionId) {
       // Update the answers object based on checkbox values
       this.answers[questionId] = this.checkboxValues[questionId] || []
@@ -318,8 +321,16 @@ export default {
       // Here would be the API call to submit the poll data
       console.log('Poll completed with answers:', this.answers)
       
-      // For now, just navigate to home page
-      this.$router.push('/')
+      // Show the Lottie animation
+      this.showLottie = true
+      this.$nextTick(() => {
+        this.loadLottieAnimation()
+      })
+      
+      // Wait a bit before navigating to home page
+      setTimeout(() => {
+        this.$router.push('/')
+      }, 3000)
     },
     toggleAgeDropdown() {
       this.isAgeDropdownOpen = !this.isAgeDropdownOpen;
@@ -340,6 +351,78 @@ export default {
       if (dropdown && !dropdown.contains(event.target)) {
         this.isAgeDropdownOpen = false;
       }
+    },
+    loadLottieAnimation() {
+      import('@lottiefiles/lottie-player')
+        .then(() => {
+          const player = document.createElement('lottie-player')
+          player.src = 'https://assets2.lottiefiles.com/private_files/lf30_wqypnpu5.json' // Programming animation JSON URL from IconScout
+          player.background = 'transparent'
+          player.speed = 1
+          player.style.width = '100%'
+          player.style.height = '300px'
+          player.autoplay = true
+          player.loop = true
+
+          if (this.$refs.lottieContainer) {
+            this.$refs.lottieContainer.innerHTML = ''
+            this.$refs.lottieContainer.appendChild(player)
+          }
+        })
+        .catch(error => {
+          console.error('Failed to load Lottie animation:', error)
+        })
+    },
+    loadBottomLottieAnimation() {
+      import('@lottiefiles/lottie-player')
+        .then(() => {
+          const player = document.createElement('lottie-player')
+          player.src = 'https://assets2.lottiefiles.com/private_files/lf30_wqypnpu5.json' // Programming animation JSON URL from IconScout
+          player.background = 'transparent'
+          player.speed = 1
+          player.style.width = '100%'
+          player.style.height = '100%'
+          player.autoplay = true
+          player.loop = true
+
+          if (this.$refs.bottomLottieContainer) {
+            this.$refs.bottomLottieContainer.innerHTML = ''
+            this.$refs.bottomLottieContainer.appendChild(player)
+          }
+        })
+        .catch(error => {
+          console.error('Failed to load bottom Lottie animation:', error)
+        })
+    },
+    updateLottieSize() {
+      if (!this.$refs.bottomLottie) return;
+      
+      // Default values for animation container
+      let height = '300px';
+      let marginTop = '30px';
+      let maxWidth = '400px';
+      
+      // Question index 3 corresponds to the 4th question (interests)
+      if (this.currentQuestionIndex === 3) {
+        // For interests question (4th) - higher position but same size
+        height = '250px';
+        marginTop = '10px';
+        maxWidth = '350px';
+      } else {
+        // For questions 1, 2, 3, and 5 - bigger size
+        height = '300px';
+        marginTop = '30px';
+        maxWidth = '400px';
+      }
+      
+      // Apply styles
+      this.$refs.bottomLottie.style.height = height;
+      this.$refs.bottomLottie.style.marginTop = marginTop;
+      
+      // Also update the animation container size
+      if (this.$refs.bottomLottieContainer) {
+        this.$refs.bottomLottieContainer.style.maxWidth = maxWidth;
+      }
     }
   },
   created() {
@@ -354,10 +437,28 @@ export default {
     currentQuestionIndex() {
       // Reset error state when changing questions
       this.showError = false
+      
+      // Update Lottie animation size based on current question
+      this.$nextTick(() => {
+        if (this.$refs.bottomLottie) {
+          this.updateLottieSize()
+        }
+      })
     }
   },
   mounted() {
     document.addEventListener('click', this.closeDropdownOnClickOutside);
+    
+    // Load the bottom Lottie animation when the component is mounted
+    this.$nextTick(() => {
+      this.loadBottomLottieAnimation()
+      // Set initial size after a short delay to ensure DOM is updated
+      setTimeout(() => {
+        if (this.$refs.bottomLottie) {
+          this.updateLottieSize()
+        }
+      }, 100)
+    })
   },
   beforeUnmount() {
     document.removeEventListener('click', this.closeDropdownOnClickOutside);
@@ -369,7 +470,7 @@ export default {
 .poll-view {
   max-width: 600px;
   margin: 0 auto;
-  padding: 40px 20px;
+  padding: 40px 20px 20px;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -390,9 +491,10 @@ export default {
 }
 
 .poll-content {
-  flex-grow: 1;
+  flex-grow: 0;
   display: flex;
   flex-direction: column;
+  margin-bottom: 30px;
 }
 
 .question-container {
@@ -488,7 +590,7 @@ h2 {
 
 .question-actions {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   margin-top: 30px;
 }
 
@@ -720,5 +822,61 @@ h2 {
   flex-direction: column;
   gap: 14px;
   margin-bottom: 28px;
+}
+
+.lottie-container {
+  margin-top: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.95);
+  z-index: 1000;
+}
+
+.lottie-content {
+  text-align: center;
+  background-color: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  max-width: 500px;
+  width: 100%;
+}
+
+.lottie-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #4776E6;
+}
+
+.lottie-animation {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.bottom-lottie {
+  margin-top: 30px;
+  width: 100%;
+  height: 300px; /* Default height, will be overridden by JS */
+  position: relative;
+  z-index: 5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: height 0.3s ease, margin-top 0.3s ease;
+}
+
+.bottom-lottie-animation {
+  width: 100%;
+  height: 100%;
+  max-width: 400px; /* Larger default size for questions 1,2,3,5 */
+  margin: 0 auto;
 }
 </style> 

@@ -4,7 +4,7 @@
             <RouterLink to="/" class="nav-item" active-class="active">
                 <div class="nav-icon">
                     <svg width="35" height="33" viewBox="0 0 35 33" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M16.7399 4.11189C17.2067 3.84291 17.7939 3.84291 18.2608 4.11189L28.4691 9.99384C28.9026 10.2436 29.167 10.6881 29.167 11.1671V26.1248C29.167 26.8842 28.5141 27.4998 27.7087 27.4998H23.3337V19.2498C23.3337 16.9716 21.3749 15.1248 18.9587 15.1248H16.042C13.6257 15.1248 11.667 16.9716 11.667 19.2498V27.4998H7.29199C6.48658 27.4998 5.83366 26.8842 5.83366 26.1248V11.1671C5.83366 10.6881 6.09805 10.2436 6.53154 9.99384L16.7399 4.11189ZM14.5837 27.4998V19.2498C14.5837 18.4904 15.2366 17.8748 16.042 17.8748H18.9587C19.7641 17.8748 20.417 18.4904 20.417 19.2498V27.4998H14.5837ZM21.8753 30.2498H27.7087C30.1249 30.2498 32.0837 28.403 32.0837 26.1248V11.1671C32.0837 9.73009 31.2905 8.39664 29.99 7.64731L19.7817 1.76537C18.3812 0.958419 16.6195 0.958418 15.219 1.76537L5.01065 7.64731C3.71016 8.39664 2.91699 9.73009 2.91699 11.1671V26.1248C2.91699 28.403 4.87575 30.2498 7.29199 30.2498H13.1253H21.8753Z" fill="#125BE4"/>
+                        <path d="M16.7399 4.11189C17.2067 3.84291 17.7939 3.84291 18.2608 4.11189L28.4691 9.99384C28.9026 10.2436 29.167 10.6881 29.167 11.1671V26.1248C29.167 26.8842 28.5141 27.4998 27.7087 27.4998H23.3337V19.2498C23.3337 16.9716 21.3749 15.1248 18.9587 15.1248H16.042C13.6257 15.1248 11.667 16.9716 11.667 19.2498V27.4998H7.29199C6.48658 27.4998 5.83366 26.8842 5.83366 26.1248V11.1671C5.83366 10.6881 6.09805 10.2436 6.53154 9.99384L16.7399 4.11189ZM14.5837 27.4998V19.2498C14.5837 18.4904 15.2366 17.8748 16.042 17.8748H18.9587C19.7641 17.8748 20.417 18.4904 20.417 19.2498V27.4998H14.5837ZM21.8753 30.2498H27.7087C30.1249 30.2498 32.0837 28.403 32.0837 26.1248V11.1671C32.0837 9.73009 31.2905 8.39664 29.99 7.64731L19.7817 1.76537C18.3812 0.958419 16.6195 0.958418 15.219 1.76537L5.01065 7.64731C3.71016 8.39664 2.91699 9.73009 2.91699 11.1671V26.1248C2.91699 28.403 4.87575 30.2498 7.29199 30.2498H13.1253H21.8753Z" fill="currentColor"/>
                     </svg>
                 </div>
                 <span>Главная</span>
@@ -105,11 +105,51 @@ import { RouterLink } from 'vue-router'
     width: 24px;
     height: 24px;
     margin-bottom: 4px;
+    position: relative;
+    z-index: 1;
+}
+
+.nav-icon:before {
+    content: "";
+    position: absolute;
+    background-color: rgba(18, 91, 228, 0.1);
+    width: 0;
+    height: 0;
+    border-radius: 8px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: -1;
+    transition: all 0.3s ease;
+}
+
+.nav-item.active .nav-icon:before,
+.nav-item:hover .nav-icon:before {
+    width: 36px;
+    height: 36px;
+}
+
+.nav-item.active .nav-icon:before {
+    background-color: rgba(18, 91, 228, 0.15);
 }
 
 .nav-icon svg {
     width: 100%;
     height: 100%;
+}
+
+.nav-icon svg path {
+    transition: fill 0.3s ease, stroke 0.3s ease;
+}
+
+.nav-item.active .nav-icon svg path {
+    fill: var(--primary-color);
+    stroke: var(--primary-color);
+}
+
+.nav-item:not(.active) .nav-icon svg path {
+    fill: #656565;
+    stroke: #656565;
 }
 
 @media (min-width: 768px) {
@@ -144,6 +184,16 @@ import { RouterLink } from 'vue-router'
 
     .nav-item.active {
         box-shadow: inset 0 -2px 0 var(--primary-color);
+    }
+
+    .nav-icon:before {
+        border-radius: 6px;
+    }
+    
+    .nav-item.active .nav-icon:before,
+    .nav-item:hover .nav-icon:before {
+        width: 40px;
+        height: 40px;
     }
 }
 </style>
